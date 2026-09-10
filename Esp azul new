@@ -1,0 +1,134 @@
+-- Delta Executor UI - Tema Azul Espacial
+local Players = game:GetService("Players")
+local Player = Players.LocalPlayer
+local PlayerGui = Player:WaitForChild("PlayerGui")
+
+-- Eliminar GUI anterior si existe para evitar duplicados
+if PlayerGui:FindFirstChild("DeltaExecutorBlue") then
+    PlayerGui.DeltaExecutorBlue:Destroy()
+end
+
+-- Creación de la pantalla principal
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "DeltaExecutorBlue"
+ScreenGui.Parent = PlayerGui
+ScreenGui.ResetOnSpawn = false
+
+-- Marco principal (Ventana del Ejecutor)
+local MainFrame = Instance.new("Frame")
+MainFrame.Size = UDim2.new(0, 500, 0, 300)
+MainFrame.Position = UDim2.new(0.5, -250, 0.5, -150)
+MainFrame.BackgroundColor3 = Color3.fromRGB(15, 20, 35)
+MainFrame.BorderSizePixel = 0
+MainFrame.Active = true
+MainFrame.Draggable = true
+MainFrame.Parent = ScreenGui
+
+-- Borde brillante azul espacial
+local UIStroke = Instance.new("UIStroke")
+UIStroke.Color = Color3.fromRGB(0, 162, 255)
+UIStroke.Thickness = 2
+UIStroke.Parent = MainFrame
+
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 8)
+UICorner.Parent = MainFrame
+
+-- Barra Superior
+local TopBar = Instance.new("Frame")
+TopBar.Size = UDim2.new(1, 0, 0, 35)
+TopBar.BackgroundColor3 = Color3.fromRGB(10, 14, 25)
+TopBar.BorderSizePixel = 0
+TopBar.Parent = MainFrame
+
+local TopBarCorner = Instance.new("UICorner")
+TopBarCorner.CornerRadius = UDim.new(0, 8)
+TopBarCorner.Parent = TopBar
+
+-- Título
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(0, 200, 1, 0)
+Title.Position = UDim2.new(0, 10, 0, 0)
+Title.BackgroundTransparency = 1
+Title.Text = "DELTA // ESPACIO AZUL"
+Title.TextColor3 = Color3.fromRGB(0, 195, 255)
+Title.TextScaled = true
+Title.Font = Enum.Font.GothamBold
+Title.Parent = TopBar
+
+-- Botón de Cerrar (X)
+local CloseButton = Instance.new("TextButton")
+CloseButton.Size = UDim2.new(0, 35, 0, 35)
+CloseButton.Position = UDim2.new(1, -35, 0, 0)
+CloseButton.BackgroundTransparency = 1
+CloseButton.Text = "X"
+CloseButton.TextColor3 = Color3.fromRGB(255, 75, 75)
+CloseButton.TextScaled = true
+CloseButton.Font = Enum.Font.GothamBold
+CloseButton.Parent = TopBar
+
+CloseButton.MouseButton1Click:Connect(function()
+    ScreenGui:Destroy()
+end)
+
+-- Caja de Texto (Editor de Scripts)
+local ScriptBox = Instance.new("TextBox")
+ScriptBox.Size = UDim2.new(1, -20, 0, 190)
+ScriptBox.Position = UDim2.new(0, 10, 0, 45)
+ScriptBox.BackgroundColor3 = Color3.fromRGB(8, 11, 18)
+ScriptBox.TextColor3 = Color3.fromRGB(200, 230, 255)
+ScriptBox.PlaceholderText = "-- Escribe tu script aquí..."
+ScriptBox.PlaceholderColor3 = Color3.fromRGB(80, 100, 130)
+ScriptBox.Text = "print('¡Delta Executor Azul Activado!')"
+ScriptBox.TextSize = 14
+ScriptBox.Font = Enum.Font.Code
+ScriptBox.ClearTextOnFocus = false
+ScriptBox.MultiLine = true
+ScriptBox.Parent = MainFrame
+
+local BoxCorner = Instance.new("UICorner")
+BoxCorner.CornerRadius = UDim.new(0, 4)
+BoxCorner.Parent = ScriptBox
+
+-- Botón de Ejecutar (Execute)
+local ExecuteBtn = Instance.new("TextButton")
+ExecuteBtn.Size = UDim2.new(0, 120, 0, 30)
+ExecuteBtn.Position = UDim2.new(0, 10, 1, -40)
+ExecuteBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
+ExecuteBtn.Text = "EJECUTAR"
+ExecuteBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+ExecuteBtn.Font = Enum.Font.GothamBold
+ExecuteBtn.TextScaled = true
+ExecuteBtn.Parent = MainFrame
+
+local ExecCorner = Instance.new("UICorner")
+ExecCorner.CornerRadius = UDim.new(0, 4)
+ExecCorner.Parent = ExecuteBtn
+
+ExecuteBtn.MouseButton1Click:Connect(function()
+    local func, err = loadstring(ScriptBox.Text)
+    if func then
+        pcall(func)
+    else
+        warn("Error en el script: " .. tostring(err))
+    end
+end)
+
+-- Botón de Limpiar (Clear)
+local ClearBtn = Instance.new("TextButton")
+ClearBtn.Size = UDim2.new(0, 120, 0, 30)
+ClearBtn.Position = UDim2.new(0, 140, 1, -40)
+ClearBtn.BackgroundColor3 = Color3.fromRGB(30, 40, 60)
+ClearBtn.Text = "LIMPIAR"
+ClearBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
+ClearBtn.Font = Enum.Font.GothamBold
+ClearBtn.TextScaled = true
+ClearBtn.Parent = MainFrame
+
+local ClearCorner = Instance.new("UICorner")
+ClearCorner.CornerRadius = UDim.new(0, 4)
+ClearCorner.Parent = ClearBtn
+
+ClearBtn.MouseButton1Click:Connect(function()
+    ScriptBox.Text = ""
+end)
