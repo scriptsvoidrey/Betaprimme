@@ -1,0 +1,22 @@
+-- Script de Velocidad (WalkSpeed) a 50 para Delta Executor
+local player = game.Players.LocalPlayer
+
+local function setSpeed()
+    if player.Character and player.Character:FindFirstChild("Humanoid") then
+        player.Character.Humanoid.WalkSpeed = 50
+    end
+end
+
+-- Aplica la velocidad inmediatamente
+setSpeed()
+
+-- Mantiene la velocidad en 50 incluso si mueres o reapareces
+player.CharacterAdded:Connect(function(character)
+    character:WaitForChild("Humanoid")
+    character.Humanoid:GetPropertyChangedSignal("WalkSpeed"):Connect(function()
+        if character.Humanoid.WalkSpeed ~= 50 then
+            character.Humanoid.WalkSpeed = 50
+        end
+    end)
+    setSpeed()
+end)
