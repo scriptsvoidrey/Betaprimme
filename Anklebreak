@@ -1,0 +1,164 @@
+--[[
+    Script Anti-Lag Optimizado para Delta Executor
+    Versión: 2.0
+    Características:
+    - Desactiva partículas innecesarias
+    - Reduce luces y efectos
+    - Optimiza físicas
+    - Desactiva sonidos ambientales
+    - Reduce distancia de renderizado
+    - Limpia objetos basura
+]]
+
+-- Configuración (ajusta según tus necesidades)
+local Config = {
+    DesactivarParticulas = true,
+    DesactivarLuces = true,
+    DesactivarSonidos = true,
+    OptimizarFisicas = true,
+    ReducirRenderizado = true,
+    LimpiarBasura = true,
+    DistanciaRenderizado = 100, -- Establece la distancia de renderizado (mayor = más lag)
+    IntervaloLimpieza = 5, -- Segundos entre cada limpieza automática
+    MostrarNotificaciones = true
+}
+
+-- Servicios de Roblox
+local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
+local Lighting = game:GetService("Lighting")
+local SoundService = game:GetService("SoundService")
+local Players = game:GetService("Players")
+local JugadorLocal = Players.LocalPlayer
+
+-- Función para notificar
+local function Notificar(mensaje)
+    if Config.MostrarNotificaciones then
+        game:GetService("StarterGui"):SetCore("SendNotification", {
+            Title = "Anti-Lag",
+            Text = mensaje,
+            Duration = 2
+        })
+    end
+end
+
+-- 1. Desactivar partículas
+local function DesactivarParticulas()
+    if not Config.DesactivarParticulas then return end
+    
+    for _, obj in ipairs(Workspace:GetDescendants()) do
+        if obj:IsA("ParticleEmitter") or obj:IsA("Trail") or obj:IsA("Beam") then
+            obj.Enabled = false
+        end
+    end
+    Notificar("Partículas desactivadas ✓")
+end
+
+-- 2. Desactivar luces innecesarias
+local function DesactivarLuces()
+    if not Config.DesactivarLuces then return end
+    
+    Lighting.Brightness = 1
+    Lighting.GlobalShadows = false
+    Lighting.FogEnd = Config.DistanciaRenderizado
+    
+    for _, luz in ipairs(Workspace:GetDescendants()) do
+        if luz:IsA("PointLight") or luz:IsA("SpotLight") or luz:IsA("SurfaceLight") then
+            luz.Enabled = false
+        end
+    end
+    Notificar("Luces optimizadas ✓")
+end
+
+-- 3. Desactivar sonidos ambientales
+local function DesactivarSonidos()
+    if not Config.DesactivarSonidos then return end
+    
+    SoundService.RespectFilteringEnabled = true
+    SoundService.AmbientReverb = Enum.ReverbType.NoReverb
+    
+    for _, sonido in ipairs(Workspace:GetDescendants()) do
+        if sonido:IsA("Sound") and not sonido:IsDescendantOf(JugadorLocal.Character) then
+            sonido.Volume = 0
+            sonido:Stop()
+        end
+    end
+    Notificar("Sonidos optimizados ✓")
+end
+
+-- 4. Optimizar físicas
+local function OptimizarFisicas()
+    if not Config.OptimizarFisicas then return end
+    
+    local Gravity = Workspace.Gravity
+    for _, parte in ipairs(Workspace:GetDescendants()) do
+        if parte:IsA("BasePart") and not parte.Anchored then
+            -- Reduce la precisión de físicas para objetos lejanos
+            local distancia = JugadorLocal:DistanceFromCharacter(parte.Position)
+            if distancia > 50 then
+                parte.CanCollide = false
+                parte.Anchored = true
+            end
+        end
+    end
+    Notificar("Físicas optimizadas ✓")
+end
+
+-- 5. Reducir distancia de renderizado
+local function ReducirRenderizado()
+    if not Config.ReducirRenderizado then return end
+    
+    for _, obj in ipairs(Workspace:GetDescendants()) do
+        if obj:IsA("BasePart") or obj:IsA("Model") then
+            local posicion = obj:IsA("BasePart") and obj.Position or obj:FindFirstChildWhichIsA("BasePart") and obj:FindFirstChildWhichIsA("BasePart").Position
+            if posicion then
+                local distancia = JugadorLocal:DistanceFromCharacter(posicion)
+                if distancia > Config.DistanciaRenderizado then
+                    obj.Transparency = 1
+                    if obj:IsA("BasePart") then
+                        obj.CanCollide = false
+                    end
+                end
+            end
+        end
+    end
+    Notificar("Renderizado reducido ✓")
+end
+
+-- 6. Limpiar objetos basura
+local function LimpiarBasura()
+    if not Config.LimpiarBasura then return end
+    
+    local objetosEliminados = 0
+    for _, obj in ipairs(Workspace:GetChildren()) do
+        if obj:IsA("Part") and obj.Name == "Part" and obj.Transparency == 1 then
+            obj:Destroy()
+            objetosEliminados = objetosEliminados + 1
+        end
+    end
+    if objetosEliminados > 0 then
+        Notificar("Basura limpiada: " .. objetosEliminados .. " objetos ✓")
+    end
+end
+
+-- Función principal que ejecuta todas las optimizaciones
+local function OptimizarTodo()
+    DesactivarParticulas()
+    DesactivarLuces()
+    DesactivarSonidos()
+    OptimizarFisicas()
+    ReducirRenderizado()
+    LimpiarBasura()
+end
+
+-- Ejecutar inmediatamente
+OptimizarTodo()
+Notificar("¡Anti-Lag activado correctamente!")
+
+-- Limpieza automática periódica
+while true do
+    wait(Config.IntervaloLimpieza)
+    OptimizarFisicas()
+    ReducirRenderizado()
+    LimpiarBasura()
+end
