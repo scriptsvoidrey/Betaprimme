@@ -1,0 +1,88 @@
+-- Script Anti-Lag SIN NIEBLAS BLANCAS
+local Config = {
+    DesactivarParticulas = true,
+    DesactivarLuces = false, -- ✅ NO toca las luces
+    DesactivarSonidos = true,
+    OptimizarFisicas = true,
+    ReducirRenderizado = true,
+    LimpiarBasura = true,
+    DistanciaRenderizado = 400, -- ✅ Lejos, sin niebla blanca
+    IntervaloLimpieza = 5,
+    MostrarNotificaciones = true
+}
+
+local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
+local Lighting = game:GetService("Lighting")
+local SoundService = game:GetService("SoundService")
+local Players = game:GetService("Players")
+local JugadorLocal = Players.LocalPlayer
+
+local function Notificar(mensaje)
+    if Config.MostrarNotificaciones then
+        game:GetService("StarterGui"):SetCore("SendNotification", {
+            Title = "Anti-Lag", Text = mensaje, Duration = 2
+        })
+    end
+end
+
+-- SIN tocar luces ni niebla ❄️
+local function DesactivarParticulas()
+    for _, obj in ipairs(Workspace:GetDescendants()) do
+        if obj:IsA("ParticleEmitter") or obj:IsA("Trail") or obj:IsA("Beam") then
+            obj.Enabled = false
+        end
+    end
+end
+
+local function DesactivarSonidos()
+    SoundService.AmbientReverb = Enum.ReverbType.NoReverb
+    for _, sonido in ipairs(Workspace:GetDescendants()) do
+        if sonido:IsA("Sound") and not sonido:IsDescendantOf(JugadorLocal.Character) then
+            sonido.Volume = 0
+        end
+    end
+end
+
+local function OptimizarFisicas()
+    for _, parte in ipairs(Workspace:GetDescendants()) do
+        if parte:IsA("BasePart") and not parte.Anchored then
+            local distancia = JugadorLocal:DistanceFromCharacter(parte.Position)
+            if distancia > 200 then parte.CanCollide = false end
+        end
+    end
+end
+
+local function ReducirRenderizado()
+    for _, obj in ipairs(Workspace:GetDescendants()) do
+        if obj:IsA("BasePart") or obj:IsA("Model") then
+            local pos = obj:IsA("BasePart") and obj.Position or 
+                (obj:FindFirstChildWhichIsA("BasePart") and obj:FindFirstChildWhichIsA("BasePart").Position)
+            if pos then
+                local distancia = JugadorLocal:DistanceFromCharacter(pos)
+                obj.Transparency = distancia > Config.DistanciaRenderizado and 1 or 0
+            end
+        end
+    end
+end
+
+local function LimpiarBasura()
+    for _, obj in ipairs(Workspace:GetChildren()) do
+        if obj:IsA("Part") and obj.Name == "Part" and obj.Transparency == 1 then
+            obj:Destroy()
+        end
+    end
+end
+
+local function OptimizarTodo()
+    DesactivarParticulas()
+    DesactivarSonidos()
+    Notificar("✅ Anti-Lag activado SIN niebla blanca")
+end
+
+OptimizarTodo()
+while task.wait(Config.IntervaloLimpieza) do
+    OptimizarFisicas()
+    ReducirRenderizado()
+    LimpiarBasura()
+end
