@@ -1,0 +1,121 @@
+local player = game.Players.LocalPlayer
+local UIS = game:GetService("UserInputService")
+local runService = game:GetService("RunService")
+
+-- Intentar colocar la GUI en una zona segura del ejecutor para evitar detección
+local guiParent = nil
+pcall(function() guiParent = game:GetService("CoreGui") end)
+if not guiParent then guiParent = player:WaitForChild("PlayerGui") end
+
+-- Crear la Interfaz (GUI)
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "ControlVelocidadDelta"
+ScreenGui.Parent = guiParent
+
+local MainFrame = Instance.new("Frame")
+MainFrame.Size = UDim2.new(0, 200, 0, 100)
+MainFrame.Position = UDim2.new(0.5, -100, 0.5, -50)
+MainFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+MainFrame.BorderSizePixel = 0
+MainFrame.Active = true
+MainFrame.Parent = ScreenGui
+
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 10)
+UICorner.Parent = MainFrame
+
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1, 0, 0, 30)
+Title.BackgroundTransparency = 1
+Title.Text = "Control Velocidad"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.Font = Enum.Font.GothamBold
+Title.TextSize = 16
+Title.Parent = MainFrame
+
+local SpeedUp = Instance.new("TextButton")
+SpeedUp.Size = UDim2.new(0, 60, 0, 40)
+SpeedUp.Position = UDim2.new(0, 20, 0, 45)
+SpeedUp.Text = "+10"
+SpeedUp.TextSize = 20
+SpeedUp.Font = Enum.Font.GothamBold
+SpeedUp.BackgroundColor3 = Color3.fromRGB(40, 180, 80)
+SpeedUp.TextColor3 = Color3.fromRGB(255, 255, 255)
+SpeedUp.Parent = MainFrame
+
+local SpeedUpCorner = Instance.new("UICorner")
+SpeedUpCorner.CornerRadius = UDim.new(0, 6)
+SpeedUpCorner.Parent = SpeedUp
+
+local SpeedDown = Instance.new("TextButton")
+SpeedDown.Size = UDim2.new(0, 60, 0, 40)
+SpeedDown.Position = UDim2.new(1, -80, 0, 45)
+SpeedDown.Text = "-10"
+SpeedDown.TextSize = 20
+SpeedDown.Font = Enum.Font.GothamBold
+SpeedDown.BackgroundColor3 = Color3.fromRGB(220, 50, 50)
+SpeedDown.TextColor3 = Color3.fromRGB(255, 255, 255)
+SpeedDown.Parent = MainFrame
+
+local SpeedDownCorner = Instance.new("UICorner")
+SpeedDownCorner.CornerRadius = UDim.new(0, 6)
+SpeedDownCorner.Parent = SpeedDown
+
+-- Lógica de Velocidad
+local currentSpeed = 16 -- Velocidad base por defecto en Roblox
+
+local function applySpeed()
+    if player.Character and player.Character:FindFirstChild("Humanoid") then
+        player.Character.Humanoid.WalkSpeed = currentSpeed
+    end
+end
+
+SpeedUp.MouseButton1Click:Connect(function()
+    currentSpeed = currentSpeed + 10
+    applySpeed()
+end)
+
+SpeedDown.MouseButton1Click:Connect(function()
+    currentSpeed = currentSpeed - 10
+    if currentSpeed < 16 then 
+        currentSpeed = 16 -- Evita que la velocidad sea demasiado lenta (opcional)
+    end
+    applySpeed()
+end)
+
+-- Bucle constante para forzar la velocidad (útil en juegos que resetean la velocidad)
+runService.RenderStepped:Connect(function()
+    if currentSpeed ~= 16 then
+        applySpeed()
+    end
+end)
+
+-- Lógica para hacer el menú arrastrable (Soporta Mouse y Pantalla Táctil)
+local dragging, dragInput, dragStart, startPos
+
+MainFrame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = MainFrame.Position
+        
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+MainFrame.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        dragInput = input
+    end
+end)
+
+UIS.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        local delta = input.Position - dragStart
+        MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
