@@ -1,0 +1,12 @@
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+
+-- Fija la velocidad a 99 de forma permanente (incluso al reaparecer)
+humanoid.WalkSpeed = 99
+
+player.CharacterAdded:Connect(function(newCharacter)
+    character = newCharacter
+    humanoid = character:WaitForChild("Humanoid")
+    humanoid.WalkSpeed = 99
+end)
