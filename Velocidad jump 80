@@ -1,0 +1,27 @@
+-- Script para Delta Executor (Velocidad y Salto 80)
+local player = game.Players.LocalPlayer
+
+local function applyModifications()
+    local character = player.Character or player.CharacterAdded:Wait()
+    local humanoid = character:WaitForChild("Humanoid")
+    
+    -- Configura la velocidad (por defecto en Roblox suele ser 16)
+    humanoid.WalkSpeed = 80
+    
+    -- Configura la potencia de salto a 80
+    humanoid.JumpPower = 80
+    -- Nota: Si el juego usa JumpHeight en lugar de JumpPower, descomenta la siguiente línea:
+    -- humanoid.JumpHeight = 80
+end
+
+-- Aplicar inmediatamente si el personaje ya existe
+if player.Character then
+    task.spawn(applyModifications)
+end
+
+-- Mantener los valores por si el personaje reaparece (muerte/respawn)
+player.CharacterAdded:Connect(function(character)
+    character:WaitForChild("Humanoid")
+    task.wait(0.5) -- Pequeña pausa para asegurar carga
+    applyModifications()
+end)
