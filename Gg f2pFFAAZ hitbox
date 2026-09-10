@@ -1,0 +1,22 @@
+-- Script de Hitbox Expander para Delta Executor
+getgenv().HitboxSize = 15 -- Cambia este número para ajustar el tamaño del hitbox
+getgenv().Transparency = 0.5 -- Visibilidad de la hitbox (0 es totalmente visible, 1 invisible)
+getgenv().TeamCheck = false -- Ponlo en true si solo quieres afectar a los enemigos
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+game:GetService("RunService").RenderStepped:Connect(function()
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            if not getgenv().TeamCheck or player.Team ~= LocalPlayer.Team then
+                local rootPart = player.Character.HumanoidRootPart
+                rootPart.Size = Vector3.new(getgenv().HitboxSize, getgenv().HitboxSize, getgenv().HitboxSize)
+                rootPart.Transparency = getgenv().Transparency
+                rootPart.BrickColor = BrickColor.new("Really red")
+                rootPart.Material = Enum.Material.Neon
+                rootPart.CanCollide = false
+            end
+        end
+    end
+end)
