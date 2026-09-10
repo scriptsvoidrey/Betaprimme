@@ -1,0 +1,14 @@
+-- Script Infinite Jump para Delta Executor
+local player = game.Players.LocalPlayer
+local userInputService = game:GetService("UserInputService")
+
+local infiniteJumpEnabled = true
+
+userInputService.JumpRequest:Connect(function()
+    if infiniteJumpEnabled then
+        local character = player.Character
+        if character and character:FindFirstChildOfClass("Humanoid") then
+            character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping)
+        end
+    end
+end)
